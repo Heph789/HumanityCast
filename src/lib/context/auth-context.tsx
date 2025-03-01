@@ -37,6 +37,15 @@ type AuthContext = {
   showAddAccountModal: () => void;
   setUser: (user: UserWithKey) => void;
   handleUserAuth: (forceKeyPair?: KeyPair) => void;
+  handleUserAuthFid: ({
+    forceKeyPair,
+    fid,
+    isHuman
+  }: {
+    forceKeyPair?: KeyPair;
+    fid?: string;
+    isHuman?: boolean;
+  }) => void;
   resetNotifications: () => void;
 };
 
@@ -81,10 +90,12 @@ export function AuthContextProvider({
 
   const manageUser = async ({
     keyPair,
-    id
+    id,
+    isHuman
   }: {
     keyPair?: KeyPair;
     id?: string;
+    isHuman?: boolean;
   }): Promise<void> => {
     let fetchedUser: UserFull | null = null;
     if (keyPair) {
@@ -94,7 +105,8 @@ export function AuthContextProvider({
       fetchedUser = result as UserFull;
     }
 
-    if (fetchedUser) setUser({ ...fetchedUser, keyPair });
+    if (fetchedUser)
+      setUser({ ...fetchedUser, verified: isHuman ?? false, keyPair });
 
     setLoading(false);
   };
@@ -119,6 +131,55 @@ export function AuthContextProvider({
     } else {
       // Default to fid 3 view-only account
       void manageUser({ id: '3' });
+      return;
+    }
+
+    // Add key pair to storage in case it's not already there
+    addKeyPair(keyPair);
+
+    // Fetch users for all key pairs
+    Promise.all(keyPairs.map(fetchUserForKey)).then((users) => {
+      const usersWithKeys = users
+        .map((user, index) =>
+          user ? { ...user, keyPair: keyPairs[index] } : null
+        )
+        .filter((user) => user !== null);
+      setUsers(usersWithKeys as UserWithKey[]);
+    });
+
+    // Go to /home if user is on /login
+    if (router.pathname === '/login' || router.pathname === '/')
+      router.push('/home');
+  };
+
+  const handleUserAuthFid = async ({
+    forceKeyPair,
+    fid,
+    isHuman
+  }: {
+    forceKeyPair?: KeyPair;
+    fid?: string;
+    isHuman?: boolean;
+  }): Promise<void> => {
+    setLoading(true);
+
+    // Get signer from local storage
+    if (forceKeyPair) {
+      setKeyPair(forceKeyPair);
+    }
+
+    let keyPair = forceKeyPair || (await getActiveKeyPair());
+    const keyPairs = await getKeyPairs();
+
+    if (keyPair) {
+      void manageUser({ keyPair });
+    } else {
+      console.log('Handling user authfid');
+      console.log('isHuman: ', isHuman);
+      // Default to fid 3 view-only account
+      void manageUser({ id: fid ?? '3', isHuman: isHuman ?? false });
+      if (router.pathname === '/login' || router.pathname === '/')
+        router.push('/home');
       return;
     }
 
@@ -226,6 +287,7 @@ export function AuthContextProvider({
     signOut,
     showAddAccountModal: modal.openModal,
     handleUserAuth,
+    handleUserAuthFid,
     resetNotifications,
     lastCheckedNotifications
   };

@@ -22,6 +22,8 @@ export function UserHomeLayout({ children }: LayoutProps): JSX.Element {
   const { user, isAdmin } = useAuth();
   const { user: userData, loading } = useUser();
 
+  console.log('User home userData: ', userData);
+
   const {
     query: { id }
   } = useRouter();
@@ -97,7 +99,7 @@ export function UserHomeLayout({ children }: LayoutProps): JSX.Element {
                   </div>
                 )}
               </div>
-              <UserDetails {...userData} />
+              <UserDetails {...userData} verified={true} />
             </div>
           </>
         )}
