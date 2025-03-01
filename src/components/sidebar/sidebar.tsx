@@ -76,7 +76,7 @@ export function Sidebar(): JSX.Element {
             {navLinks.map(({ ...linkData }) => (
               <SidebarLink {...linkData} key={linkData.href} />
             ))}
-            {user?.keyPair && (
+            {(user?.keyPair || true) && (
               <>
                 <div
                   onClick={() => {
@@ -129,11 +129,12 @@ export function Sidebar(): JSX.Element {
             </div>
           )}
         </section>
-        {!isMobile && user?.keyPair &&
-          <div className='gap-4 flex flex-col'>
+        {!isMobile && user?.keyPair && (
+          <div className='flex flex-col gap-4'>
             <SyncView userId={user.id} />
             <SidebarProfile />
-          </div>}
+          </div>
+        )}
         {!user?.keyPair && (
           <Link
             className='custom-button main-tab accent-tab absolute right-4 -translate-y-[72px] bg-main-accent text-center text-lg font-bold text-white

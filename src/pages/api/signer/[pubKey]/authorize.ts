@@ -57,25 +57,25 @@ export default async function handle(
     claims: {
       kyc: 'passed',
       age: 22,
-      custom_claim: 'value',
-    },
+      custom_claim: 'value'
+    }
   };
 
   const isHumanResponse = await fetch(apiUrl, {
     method: 'POST',
     headers: {
-      'X-API-Token': process.env.HUMANITY_API_KEY,
-      'Content-Type': 'application/json',
+      'X-API-Token': process.env.HUMANITY_API_KEY as string,
+      'Content-Type': 'application/json'
     },
-    body: JSON.stringify(requestBody),
+    body: JSON.stringify(requestBody)
   });
 
   const isHumanData = await isHumanResponse.json();
 
-   let isHuman: boolean = false
+  let isHuman: boolean = false;
 
-  if (isHumanData.message == "Credential issued successfully") {
-    isHuman = true
+  if (isHumanData.message == 'Credential issued successfully') {
+    isHuman = true;
   }
   res.json({
     result: {
@@ -83,7 +83,7 @@ export default async function handle(
       requestFid: parseInt(appFid),
       deadline,
       requestSigner: account.address,
-      isHuman: isHuman, // Additional parameter added
+      isHuman: isHuman // Additional parameter added
     }
   });
 }

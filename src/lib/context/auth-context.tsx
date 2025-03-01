@@ -39,10 +39,12 @@ type AuthContext = {
   handleUserAuth: (forceKeyPair?: KeyPair) => void;
   handleUserAuthFid: ({
     forceKeyPair,
-    fid
+    fid,
+    isHuman
   }: {
     forceKeyPair?: KeyPair;
     fid?: string;
+    isHuman?: boolean;
   }) => void;
   resetNotifications: () => void;
 };
@@ -88,10 +90,12 @@ export function AuthContextProvider({
 
   const manageUser = async ({
     keyPair,
-    id
+    id,
+    isHuman
   }: {
     keyPair?: KeyPair;
     id?: string;
+    isHuman?: boolean;
   }): Promise<void> => {
     let fetchedUser: UserFull | null = null;
     if (keyPair) {
@@ -101,7 +105,8 @@ export function AuthContextProvider({
       fetchedUser = result as UserFull;
     }
 
-    if (fetchedUser) setUser({ ...fetchedUser, keyPair });
+    if (fetchedUser)
+      setUser({ ...fetchedUser, verified: isHuman ?? false, keyPair });
 
     setLoading(false);
   };
@@ -149,10 +154,12 @@ export function AuthContextProvider({
 
   const handleUserAuthFid = async ({
     forceKeyPair,
-    fid
+    fid,
+    isHuman
   }: {
     forceKeyPair?: KeyPair;
     fid?: string;
+    isHuman?: boolean;
   }): Promise<void> => {
     setLoading(true);
 
@@ -167,8 +174,10 @@ export function AuthContextProvider({
     if (keyPair) {
       void manageUser({ keyPair });
     } else {
+      console.log('Handling user authfid');
+      console.log('isHuman: ', isHuman);
       // Default to fid 3 view-only account
-      void manageUser({ id: fid ?? '3' });
+      void manageUser({ id: fid ?? '3', isHuman: isHuman ?? false });
       if (router.pathname === '/login' || router.pathname === '/')
         router.push('/home');
       return;

@@ -20,11 +20,15 @@ export default function Home(): JSX.Element {
   const { isMobile } = useWindow();
   const { user, userNotifications } = useAuth();
 
+  console.log('User: ', user);
+
   const { data: onlineResponse, isValidating: onlineUsersLoading } = useSWR(
     `/api/online?fid=${user?.id}`,
     async (url) => (await fetchJSON<OnlineUsersResponse>(url)).result,
     { revalidateOnFocus: false, refreshInterval: 10_000 }
   );
+
+  console.log('Online response: ', onlineResponse);
 
   const [feedOrdering, setFeedOrdering] = useState<FeedOrderingType>('latest');
 
