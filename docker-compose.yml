@@ -37,8 +37,14 @@ services:
       HUB_REST_URL: https://hub.pinata.cloud
       HUB_RPC: hub-grpc.pinata.cloud
       HUB_SSL: true
-      WORKER_CONCURRENCY: 5
+      WORKER_CONCURRENCY: 20
+      BACKFILL_CONCURRENCY: 20
+      ROOT_BACKFILL_CONCURRENCY: 20
       LOG_LEVEL: debug
+      ENABLE_BACKFILL: "true"
+      BACKFILL_BATCH_SIZE: 100
+      STREAM_BATCH_SIZE: 100
+      SYNC_INTERVAL_MS: 1000
     depends_on:
       postgres:
         condition: service_healthy
@@ -58,14 +64,26 @@ services:
       - POSTGRES_DB=indexer
       - POSTGRES_USER=indexer
       - POSTGRES_PASSWORD=password
+      - POSTGRES_MAX_CONNECTIONS=200
+      - POSTGRES_SHARED_BUFFERS=256MB
+      - POSTGRES_WORK_MEM=16MB
+      - POSTGRES_MAINTENANCE_WORK_MEM=128MB
+      - POSTGRES_EFFECTIVE_CACHE_SIZE=512MB
+    command: >
+      postgres
+      -c shared_buffers=256MB
+      -c work_mem=16MB
+      -c maintenance_work_mem=128MB
+      -c effective_cache_size=512MB
+      -c max_connections=200
     volumes:
       - postgres-data:/var/lib/postgresql/data
     healthcheck:
       test: ['CMD-SHELL', 'pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB']
-      interval: 5s # Check every 5 seconds for readiness
-      timeout: 5s # Allow up to 5 seconds for a response
-      retries: 3 # Fail after 3 unsuccessful attempts
-      start_period: 10s # Start checks after 10 seconds
+      interval: 5s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
     networks:
       - app-network
 
