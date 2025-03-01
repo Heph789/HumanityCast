@@ -50,6 +50,7 @@ const WarpcastAuthPopup = ({ closeModal }: { closeModal?: () => void }) => {
             `/api/signer/${pendingRequest!.keyPair.publicKey}/authorize`
           ) as Promise<
             BaseResponse<{
+              isHuman: boolean;
               requestFid: number;
               signature: string;
               deadline: number;
@@ -59,7 +60,12 @@ const WarpcastAuthPopup = ({ closeModal }: { closeModal?: () => void }) => {
           if (!authorizationResult) {
             toast.error('Error generating signature');
             return;
-          } else {
+          }
+          if (!authorizationResult.isHuman) {
+            toast.error('User verification failed: Not human');       
+            return;
+          }
+          else {
             // Send signature to Warpcast for transaction broadcast
             (
               fetchJSON(`https://api.warpcast.com/v2/signed-key-requests`, {
@@ -111,7 +117,7 @@ const WarpcastAuthPopup = ({ closeModal }: { closeModal?: () => void }) => {
     // Load existing request
     const pendingWarpcastRequestRaw = localStorage.getItem(
       PENDING_REQUEST_KEY
-    ) as string;
+    )as string;
 
     let request: WarpcastRequest | undefined;
 

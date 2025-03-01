@@ -2,11 +2,16 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { mnemonicToAccount } from 'viem/accounts';
 import { AppAuthResponse } from '../../../../lib/types/app-auth';
 
-// https://warpcast.notion.site/Signer-Request-API-Migration-Guide-Public-9e74827f9070442fb6f2a7ffe7226b3c
+interface Claims {
+  kyc: string;
+  age: number;
+  custom_claim: string;
+}
 
-type SignerEndpointQuery = {
-  pubKey: `0x${string}`;
-};
+interface RequestBody {
+  subject_address: string;
+  claims: Claims;
+}
 
 const SIGNED_KEY_REQUEST_VALIDATOR_EIP_712_DOMAIN = {
   name: 'Farcaster SignedKeyRequestValidator',
@@ -21,11 +26,14 @@ const SIGNED_KEY_REQUEST_TYPE = [
   { name: 'deadline', type: 'uint256' }
 ] as const;
 
+const apiUrl: string = 'https://issuer.humanity.org/credentials/issue';
+// const apiToken: string = 'YOUR_API_KEY';
+
 export default async function handle(
   req: NextApiRequest,
   res: NextApiResponse<AppAuthResponse>
 ): Promise<void> {
-  const { pubKey } = req.query as SignerEndpointQuery;
+  const { pubKey } = req.query as { pubKey: `0x${string}` };
 
   const appFid = process.env.APP_FID!;
   const account = mnemonicToAccount(process.env.APP_MNENOMIC!);
@@ -44,12 +52,38 @@ export default async function handle(
     }
   });
 
+  const requestBody: RequestBody = {
+    subject_address: account.address,
+    claims: {
+      kyc: 'passed',
+      age: 22,
+      custom_claim: 'value',
+    },
+  };
+
+  const isHumanResponse = await fetch(apiUrl, {
+    method: 'POST',
+    headers: {
+      'X-API-Token': process.env.HUMANITY_API_KEY,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(requestBody),
+  });
+
+  const isHumanData = await isHumanResponse.json();
+
+   let isHuman: boolean = false
+
+  if (isHumanData.message == "Credential issued successfully") {
+    isHuman = true
+  }
   res.json({
     result: {
       signature,
       requestFid: parseInt(appFid),
       deadline,
-      requestSigner: account.address
+      requestSigner: account.address,
+      isHuman: isHuman, // Additional parameter added
     }
   });
 }
