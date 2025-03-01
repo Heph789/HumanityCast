@@ -10,6 +10,7 @@ import { addKeyPair } from '../../lib/keys';
 import WalletSignInModal from '../modal/sign-in-modal-wallet';
 import { WarpcastSignInModal } from '../modal/sign-in-modal-warpcast';
 import { HeroIcon } from '../ui/hero-icon';
+import DummySignInModal from '@components/modal/sign-in-modal-dummy';
 
 export function LoginMain(): JSX.Element {
   const {
@@ -22,6 +23,12 @@ export function LoginMain(): JSX.Element {
     openModal: openModalWallet,
     closeModal: closeModalWallet,
     open: openWallet
+  } = useModal();
+
+  const {
+    openModal: openModalDummy,
+    closeModal: closeModalDummy,
+    open: openDummy
   } = useModal();
 
   const { handleUserAuth } = useAuth();
@@ -49,6 +56,10 @@ export function LoginMain(): JSX.Element {
         closeModal={closeModalWallet}
         open={openWallet}
       ></WalletSignInModal>
+      <DummySignInModal
+        closeModal={closeModalDummy}
+        open={openDummy}
+      ></DummySignInModal>
 
       <div className='flex flex-col items-center justify-between gap-6 p-8 lg:items-start lg:justify-center'>
         <i className='mb-0 self-center lg:mb-10 lg:self-auto'>
@@ -83,6 +94,14 @@ export function LoginMain(): JSX.Element {
               onClick={openModalWallet}
             >
               <HeroIcon iconName='GlobeAltIcon' /> Sign in with Ethereum
+            </Button>
+            <Button
+              className='flex justify-center gap-2 border border-light-line-reply font-bold text-light-primary transition
+                         hover:bg-[#e6e6e6] focus-visible:bg-[#e6e6e6] active:bg-[#cccccc] dark:border-0 dark:bg-white
+                         dark:hover:brightness-90 dark:focus-visible:brightness-90 dark:active:brightness-75'
+              onClick={openModalDummy}
+            >
+              <HeroIcon iconName='GlobeAltIcon' /> Dummy sign in
             </Button>
             <Button
               className='flex justify-center gap-2 border border-light-line-reply font-bold text-light-primary transition
@@ -131,6 +150,7 @@ export function LoginMain(): JSX.Element {
             >
               <HeroIcon iconName='KeyIcon' /> Sign in with Passkey
             </Button>
+
             <Link
               href='/home'
               className='custom-button main-tab flex justify-center gap-2 border border-white bg-black font-bold text-white
