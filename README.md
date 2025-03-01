@@ -1,3 +1,7 @@
+# HumanityCast
+
+Humanity Cast is a farcaster client forked from [opencast](https://github.com/opencast/opencast) that verifies the humanity of its users. Read below for Opencast instructions.
+
 # Opencast
 
 A fully open source Twitter flavoured Farcaster client. Originally a fork of [ccrsxx/twitter-clone](https://github.com/ccrsxx/twitter-clone).
